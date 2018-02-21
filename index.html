@@ -1,0 +1,110 @@
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: verdana;
+            margin: 0;
+        }
+
+        #sendButton {
+            padding: 10px;
+            width: 100px;
+            background-color: #333;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+
+        }
+
+        #sendButton:hover {
+            background-color: white;
+            color: black;
+        }
+
+        header {
+            background-color: #666;
+            position: fixed;
+            width: 100%;
+            padding: 1em;
+
+        }
+
+        header table {
+            color: white;
+        }
+
+        #messages {
+            padding-top: 120px;
+        }
+
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        var socket;
+
+        function onload() {
+            socket = io.connect();
+            socket.on('message', (msg) => {
+                console.log("Recieved message: " + msg);
+            });
+
+            socket.on('broadcast', (msg) => {
+                var box = document.getElementById('messages');
+                box.innerHTML += '<p>' + msg + '</p>';
+                window.scrollTo(0, document.body.scrollHeight + document.body.style.marginBottom);
+
+            });
+
+            document.getElementById("msgBox").addEventListener('keyup', enterHandler);
+
+
+        }
+
+        var enterHandler = function(e) {
+            if (e.keyCode == 13) {
+                sendMessage();
+            }
+
+        }
+
+
+        function sendMessage() {
+            var name = document.getElementById("nameBox").value;
+            var msg = document.getElementById("msgBox").value;
+            if (msg && name) {
+                socket.emit('message', msg, name);
+                console.log("sending " + msg);
+            }
+
+            document.getElementById("msgBox").value = '';
+
+        }
+
+    </script>
+</head>
+
+<body onload="onload()">
+
+    <header>
+        <table>
+            <tr>
+                <td>Name:</td>
+                <td><input id="nameBox" type="text" /></td>
+            </tr>
+            <tr>
+                <td>Message:</td>
+                <td><input id="msgBox" type="text" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input id="sendButton" type="button" onClick="sendMessage()" value="send" /></td>
+            </tr>
+        </table>
+    </header>
+
+    <div id='messages'></div>
+
+</body>
+
+</html>
